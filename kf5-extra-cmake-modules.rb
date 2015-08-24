@@ -16,9 +16,10 @@ class Kf5ExtraCmakeModules < Formula
     system "make", "install"
     prefix.install "install_manifest.txt"
 
-    ### Hack - QStandardDirs only looks in $HOME/Library/Application Support/, but kf5 installs
-    ### to share. Make a symlink
-    ln_sf Dir["#{HOMEBREW_PREFIX}/share/kf5"], "#{ENV['HOME']}/Library/Application Support/"
-    ln_sf Dir["#{HOMEBREW_PREFIX}/share/kxmlgui5"], "#{ENV['HOME']}/Library/Application Support/"
+    # Make findable from QStandardPaths:
+    support  = "#{Etc.getpwuid.dir}/Library/Application Support"
+    share    = HOMEBREW_PREFIX/"share"
+  
+    ln_sf share/"kf5", support
   end
 end

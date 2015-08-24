@@ -21,5 +21,14 @@ class Kf5Kxmlgui < Formula
     system "cmake", ".", *args
     system "make", "install"
     prefix.install "install_manifest.txt"
+
+    # Make findable from QStandardPaths:
+    support  = "#{Etc.getpwuid.dir}/Library/Application Support"
+    share    = HOMEBREW_PREFIX/"share"
+  
+    ln_sf share/"kxmlgui5", support
+
+
   end
+
 end

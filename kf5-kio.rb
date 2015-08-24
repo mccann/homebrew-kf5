@@ -16,14 +16,35 @@ class Kf5Kio < Formula
   depends_on "haraldf/kf5/kf5-kwallet"
   depends_on "haraldf/kf5/kf5-solid"
 
-  def install
-    args = std_cmake_args
-    args << "-DCMAKE_CXX_FLAGS='-D_DARWIN_C_SOURCE'"
-    args << "-DCMAKE_C_FLAGS='-D_DARWIN_C_SOURCE'"
-    args << "-DCMAKE_REQUIRED_DEFINITIONS='-D_DARWIN_C_SOURCE'"
 
-    system "cmake", ".", *args
-    system "make", "install"
-    prefix.install "install_manifest.txt"
+  def install
+
+    system <<-FIXUP
+
+        ###################
+        # Installing into Cellar confuses matters
+        #   CMAKE_INSTALL_FULL_LIBEXECDIR_KF5 (Cellar path) is used as a define in source.
+        # -- fix that
+        git ls-files -z '*.h.cmake'  | xargs -0 sed -i.bak \
+            -e 's/${CMAKE_INSTALL_FULL_LIBEXECDIR_KF5}/#{(HOMEBREW_PREFIX/"lib/libexec/kf5").to_s.gsub('/','\\/')}/g'
+
+    FIXUP
+
+    mkdir "build" do
+        args = std_cmake_args
+      
+        system "cmake", *args, ".."
+        #interactive_shell 
+
+        system "make", "install"
+        prefix.install "install_manifest.txt"
+
+        # Make findable from QStandardPaths:
+        support  = "#{Etc.getpwuid.dir}/Library/Application Support"
+        share    = HOMEBREW_PREFIX/"share"
+      
+        ln_sf share/"kservices5", support
+    end
   end
 end
+

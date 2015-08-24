@@ -5,7 +5,7 @@ class Kf5Kjsembed < Formula
   sha1 "7564adf5411304c3f32488dc4f275477f2883068"
   homepage "http://www.kde.org/"
 
-  head 'git://anongit.kde.org/attica.git'
+  head 'git://anongit.kde.org/kjsembed.git'
 
   depends_on "cmake" => :build
   depends_on "haraldf/kf5/kf5-extra-cmake-modules" => :build

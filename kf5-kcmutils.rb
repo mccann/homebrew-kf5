@@ -11,6 +11,7 @@ class Kf5Kcmutils < Formula
   depends_on "haraldf/kf5/kf5-extra-cmake-modules" => :build
   depends_on "qt5" => "with-d-bus"
   depends_on "haraldf/kf5/kf5-kxmlgui"
+  depends_on "haraldf/kf5/kf5-kdeclarative"
 
   def install
     args = std_cmake_args
