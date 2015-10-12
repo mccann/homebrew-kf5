@@ -21,7 +21,6 @@ class Kf5Kdelibs4support < Formula
   def install
     args = std_cmake_args
 
-    args << "-DCMAKE_CXX_FLAGS='-D_DARWIN_C_SOURCE'"
 
     system "cmake", ".", *args
     system "make", "install"

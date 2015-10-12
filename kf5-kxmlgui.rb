@@ -30,5 +30,4 @@ class Kf5Kxmlgui < Formula
 
 
   end
-
 end
