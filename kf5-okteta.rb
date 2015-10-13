@@ -2,8 +2,8 @@ require "formula"
 
 class Kf5Okteta < Formula
   homepage "http://www.kde.org/"
-  url "http://download.kde.org/stable/applications/15.08.1/src/okteta-15.08.1.tar.xz"
-  sha256 "32389deec8fbabd8c24b1d9b23b3358c0878d1680a40a8137a82e7601876ab92"
+  url "http://download.kde.org/stable/applications/15.08.2/src/okteta-15.08.2.tar.xz"
+  sha256 "8bda40030b2c853cb5c78e40088af654bd0193a123b3e018e80dc5636da44930"
   head "git://anongit.kde.org/okteta.git"
 
   depends_on "cmake" => :build

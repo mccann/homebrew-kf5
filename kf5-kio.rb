@@ -1,8 +1,8 @@
 require "formula"
 
 class Kf5Kio < Formula
-  url "http://download.kde.org/stable/frameworks/5.14/kio-5.14.0.tar.xz"
-  sha1 "b13653322bba5a28e1d01199ee3c84b67cadfa79"
+  url "http://download.kde.org/stable/frameworks/5.15/kio-5.15.0.tar.xz"
+  sha1 "8bc58e83f9a8bac99899e3e383044d6d1eb05d13"
   homepage "http://www.kde.org/"
 
   head 'git://anongit.kde.org/kio.git'
