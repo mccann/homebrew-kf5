@@ -5,7 +5,7 @@ class Kf5Kdewebkit < Formula
   sha1 "6ae17737c4d5fd39e6eda93b624ecf7d8901689d"
   homepage "http://www.kde.org/"
 
-  head 'git://anongit.kde.org/attica.git'
+  head 'git://anongit.kde.org/kdewebkit.git'
 
   depends_on "cmake" => :build
   depends_on "haraldf/kf5/kf5-extra-cmake-modules" => :build
@@ -18,6 +18,8 @@ class Kf5Kdewebkit < Formula
 
     system "cmake", ".", *args
     system "make", "install"
+
     prefix.install "install_manifest.txt"
+
   end
 end

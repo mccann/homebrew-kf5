@@ -5,7 +5,7 @@ class Kf5Kdnssd < Formula
   sha1 "daeb960f67b9b9a567509e70fae56bb49f7a3462"
   homepage "http://www.kde.org/"
 
-  head 'git://anongit.kde.org/attica.git'
+  head 'git://anongit.kde.org/kdnssd.git'
 
   depends_on "cmake" => :build
   depends_on "haraldf/kf5/kf5-extra-cmake-modules" => :build

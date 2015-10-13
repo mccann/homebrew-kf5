@@ -5,7 +5,7 @@ class Kf5Kmediaplayer < Formula
   sha1 "73806ed173e2e0db498025f7ea78ac8bf86ac55e"
   homepage "http://www.kde.org/"
 
-  head 'git://anongit.kde.org/attica.git'
+  head 'git://anongit.kde.org/kmediaplayer.git'
 
   depends_on "cmake" => :build
   depends_on "haraldf/kf5/kf5-extra-cmake-modules" => :build

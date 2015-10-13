@@ -86,7 +86,7 @@ class Kf5Kdevelop < Formula
     ln_sf share/"kdevmanpage", support
 
     # all prefs
-    system "ln -s /usr/local/etc/xdg/*  #{prefs}"
+    system "ln -sf /usr/local/etc/xdg/*  #{prefs}"
     
   end
 end
