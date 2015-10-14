@@ -7,6 +7,10 @@ class Kf5Kiconthemes < Formula
 
   head 'git://anongit.kde.org/kiconthemes.git'
 
+  def patches
+    DATA
+  end
+
   depends_on "cmake" => :build
   depends_on "haraldf/kf5/kf5-extra-cmake-modules" => :build
   depends_on "haraldf/kf5/kf5-kconfigwidgets"
@@ -22,3 +26,31 @@ class Kf5Kiconthemes < Formula
     prefix.install "install_manifest.txt"
   end
 end
+
+__END__
+
+diff --git a/src/kicontheme.cpp b/src/kicontheme.cpp
+index d0ab4b9..e4c3c61 100644
+--- a/src/kicontheme.cpp
++++ b/src/kicontheme.cpp
+@@ -171,6 +171,20 @@ KIconTheme::KIconTheme(const QString &name, const QString &appName, const QStrin
+         return;
+     }
+ 
++#ifdef Q_OS_MAC
++    // only update search paths once.
++    auto paths = QIcon::themeSearchPaths();
++    // assume count()==1 is the default {":/icons"} case
++    if (paths.count()==1) {
++        paths += icnlibs;
++        QIcon::setThemeSearchPaths( paths );
++        //qWarning() << "QIcon::setThemeSearchPaths(" << paths << ")";
++    }
++
++    //qWarning() << "QIcon::setThemeName(" << name << ")";
++    QIcon::setThemeName(name);
++#endif
++
+     // Use KSharedConfig to avoid parsing the file many times, from each component.
+     // Need to keep a ref to it to make this useful
+     d->sharedConfig = KSharedConfig::openConfig(fileName, KConfig::NoGlobals);
