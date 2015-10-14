@@ -39,6 +39,21 @@ class Kf5Kate < Formula
     system "cmake", ".", *args
     system "make", "install"
     prefix.install "install_manifest.txt"
+  
+    #fix icons to work as part of 'oxygen' theme
+    mv share/"icons/hicolor", share/"icons/oxygen"
+
+    # remove icons that conflict with oxygen theme before linking
+    Dir.glob(share/"icons/oxygen/**/kate.*") { |icon| File.delete(icon) }
+
+    # add HiDPI support
+    inreplace "/Applications/KDE/kate.app/Contents/Info.plist", "</dict>" ,<<-'EOS'
+        <key>NSPrincipalClass</key>
+        <string>NSApplication</string>
+        <key>NSHighResolutionCapable</key>
+        <string>True</string>
+    </dict>
+    EOS
   end
 end
 

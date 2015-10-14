@@ -16,10 +16,10 @@ class Kf5OxygenIcons < Formula
     system "make", "install"
     prefix.install "install_manifest.txt"
    
-    support  = "#{Etc.getpwuid.dir}/Library/Application Support"
-    share    = HOMEBREW_PREFIX/"share"
+    support         = "#{Etc.getpwuid.dir}/Library/Application Support"
+    systemshare     = HOMEBREW_PREFIX/"share"
   
-    ln_sf share/"icons", support
+    ln_sf systemshare/"icons", support
   end
 
   def caveats; <<-EOS.undent

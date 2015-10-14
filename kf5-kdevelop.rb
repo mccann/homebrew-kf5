@@ -74,20 +74,27 @@ class Kf5Kdevelop < Formula
     # Make findable from QStandardPaths:
     support  = "#{Etc.getpwuid.dir}/Library/Application Support"
     prefs    = "#{Etc.getpwuid.dir}/Library/Preferences"
-    share    = HOMEBREW_PREFIX/"share"
+    systemshare    = HOMEBREW_PREFIX/"share"
   
-    ln_sf share/"icons", support
-    #ln_sf share/"appdata", support
-    #ln_sf share/"applications", support
-    ln_sf share/"kdevappwizard", support
-    ln_sf share/"kdevcodegen", support
-    ln_sf share/"kdevelop", support
-    ln_sf share/"kdevfiletemplates", support
-    ln_sf share/"kdevmanpage", support
+    ln_sf systemshare/"icons", support
+    #ln_sf systemshare/"appdata", support
+    #ln_sf systemshare/"applications", support
+    ln_sf systemshare/"kdevappwizard", support
+    ln_sf systemshare/"kdevcodegen", support
+    ln_sf systemshare/"kdevelop", support
+    ln_sf systemshare/"kdevfiletemplates", support
+    ln_sf systemshare/"kdevmanpage", support
 
     # all prefs
     system "ln -sf /usr/local/etc/xdg/*  #{prefs}"
     
+    #fix icons to work as part of 'oxygen' theme
+    mv share/"icons/hicolor", share/"icons/oxygen"
+    mv share/"kdevelop/icons/hicolor", share/"kdevelop/icons/oxygen"
+
+    # remove icons that conflict with oxygen theme before linking
+    Dir.glob(share/"icons/oxygen/**/kdevelop.*") { |icon| File.delete(icon) }
+
   end
 end
 
@@ -106,6 +113,27 @@ index 22d29ec..43e8e78 100644
  
  option(LEGACY_CPP_SUPPORT "Enable legacy C++ backend" OFF)
  
+
+
+##################
+# enable hidpi
+##################
+diff --git a/app/Info.plist.in b/app/Info.plist.in
+index ca6c7de..be256f9 100644
+--- a/app/Info.plist.in
++++ b/app/Info.plist.in
+@@ -34,6 +34,10 @@
+     <true/>
+     <key>NSSupportsAutomaticTermination</key>
+     <false/>
++    <key>NSPrincipalClass</key>
++    <string>NSApplication</string>
++    <key>NSHighResolutionCapable</key>
++    <string>True</string>
+     <key>NSHumanReadableCopyright</key>
+     <string>${MACOSX_BUNDLE_COPYRIGHT}</string>
+ </dict>
+
 
 ##################
 # clang issue
