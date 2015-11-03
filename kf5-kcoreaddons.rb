@@ -13,11 +13,23 @@ class Kf5Kcoreaddons < Formula
   depends_on "shared-mime-info"
 
   def install
+
+    # don't create mime-databae in Keg -- do this later
+    inreplace "src/mimetypes/CMakeLists.txt", 
+        'update_xdg_mimetypes(',
+        '#update_xdg_mimetypes('
+
+
     args = std_cmake_args
-
-
     system "cmake", ".", *args
     system "make", "install"
     prefix.install "install_manifest.txt"
+
   end
+
+  def post_install
+    #create/update mime-database in homebrew system
+    system "update-mime-database", HOMEBREW_PREFIX/"share/mime"  
+  end
+
 end

@@ -12,14 +12,20 @@ class Kf5ExtraCmakeModules < Formula
   depends_on "cmake" => :build
 
   def install
-    system "cmake", ".", *std_cmake_args
-    system "make", "install"
-    prefix.install "install_manifest.txt"
+    
+    mkdir "build" do 
+        system "cmake", *std_cmake_args, ".."
+        system "make", "install"
+        prefix.install "install_manifest.txt"
+    end
 
+    # Make Bundle/GUI apps install inside the Cellar,  use linkapps to link into system
+    inreplace prefix/"share/ECM/kde-modules/KDEInstallDirs.cmake", 
+        '_define_absolute(BUNDLEDIR "/Applications/KDE"',
+        '_define_absolute(BUNDLEDIR ${CMAKE_INSTALL_PREFIX}'
+            
+    
     # Make findable from QStandardPaths:
-    support  = "#{Etc.getpwuid.dir}/Library/Application Support"
-    share    = HOMEBREW_PREFIX/"share"
-  
-    ln_sf share/"kf5", support
+    ln_sf HOMEBREW_PREFIX/"share/kf5", "#{Etc.getpwuid.dir}/Library/Application Support"
   end
 end

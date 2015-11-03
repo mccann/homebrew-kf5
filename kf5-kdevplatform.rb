@@ -1,11 +1,9 @@
 require "formula"
 
 class Kf5Kdevplatform < Formula
-  url "http://download.kde.org/stable/kdevelop/4.7.1/src/kdevplatform-1.7.1.tar.xz"
-  sha1 "dbb0524ec455fe88e1aa68f03b42c845c3a87154"
-  homepage "http://www.kde.org/"
+  homepage "http://www.kdevelop.org/"
 
-  head "git://anongit.kde.org/kdevplatform.git"
+  head "git://anongit.kde.org/kdevplatform.git", :branch => 5.0, :revision => "25e98f4b101b26a570633e82d4863fcb834423b3"
   
   depends_on "cmake" => :build
   depends_on "haraldf/kf5/kf5-extra-cmake-modules" => :build
@@ -22,9 +20,6 @@ class Kf5Kdevplatform < Formula
   depends_on "haraldf/kf5/kf5-kitemmodels"
   depends_on "haraldf/kf5/kf5-ktexteditor"
 
-  conflicts_with "kdevplatform"
-
-
   def patches
     DATA
   end
@@ -32,7 +27,7 @@ class Kf5Kdevplatform < Formula
   def install
     args = std_cmake_args
 
-    system <<-'FIXUP'
+    #system <<-'FIXUP'
 
         ## make install dirs KF5
         ## -- decided not to do this, there's so much more to change to make this 'isolated' from kde4
@@ -58,8 +53,7 @@ class Kf5Kdevplatform < Formula
         #
         #git mv cmake/modules/KDevPlatformMacros.cmake cmake/modules/KF5KDevPlatformMacros.cmake
 
-    FIXUP
-
+    #FIXUP
 
     mkdir "build" do
         system "cmake", *args, ".."
@@ -100,7 +94,7 @@ index 0a596e7..eba9ecd 100644
  }
 
 #################################################################
-#  patch sessions to be in CacheLocation
+#  patch sessions to be in CacheLocation -- prevent conflict with other ~/Library/Application Support/kdevelop directory
 #################################################################
 
 diff --git a/shell/sessioncontroller.cpp b/shell/sessioncontroller.cpp
@@ -117,3 +111,5 @@ index a4344d8..f95f9a6 100644
      }
  
      QString ownSessionDirectory() const
+
+

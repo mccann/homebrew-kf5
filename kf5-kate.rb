@@ -27,46 +27,23 @@ class Kf5Kate < Formula
   depends_on "haraldf/kf5/kf5-kitemmodels"
   depends_on "haraldf/kf5/kf5-knewstuff"
   depends_on "haraldf/kf5/kf5-kwallet"
-
-  def patches
-    DATA
-  end
+  depends_on "kf5-breeze-icons"
 
   def install
     args = std_cmake_args
 
 
-    system "cmake", ".", *args
+    system "cmake", *args, "."
     system "make", "install"
     prefix.install "install_manifest.txt"
   
-    #fix icons to work as part of 'oxygen' theme
-    mv share/"icons/hicolor", share/"icons/oxygen"
+    #fix icons to work as part of 'breeze' theme
+    mv share/"icons/hicolor", share/"icons/breeze"
 
-    # remove icons that conflict with oxygen theme before linking
-    Dir.glob(share/"icons/oxygen/**/kate.*") { |icon| File.delete(icon) }
+    # remove icons that conflict with breeze theme before linking
+    Dir.glob(share/"icons/breeze/**/kate.*") { |icon| File.delete(icon) }
 
-    # add HiDPI support
-    inreplace "/Applications/KDE/kate.app/Contents/Info.plist", "</dict>" ,<<-'EOS'
-        <key>NSPrincipalClass</key>
-        <string>NSApplication</string>
-        <key>NSHighResolutionCapable</key>
-        <string>True</string>
-    </dict>
-    EOS
   end
 end
 
 __END__
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e8f47ed..8de15f1 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -38,6 +38,7 @@ find_package(KF5 REQUIRED COMPONENTS
-   DocTools
-   GuiAddons
-   I18n
-+  IconThemes
-   Init
-   JobWidgets
-   KIO

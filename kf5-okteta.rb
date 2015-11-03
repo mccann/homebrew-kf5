@@ -31,13 +31,25 @@ class Kf5Okteta < Formula
   end
 
   def install
-    args = std_cmake_args
 
+    # don't create mime-databae in Keg -- do this later
+    inreplace "mimetypes/CMakeLists.txt", 
+        'update_xdg_mimetypes(',
+        '#update_xdg_mimetypes('
+
+
+    args = std_cmake_args
 
     system "cmake", ".", *args
     system "make", "install"
     prefix.install "install_manifest.txt"
   end
+
+  def post_install
+    #update mime-database in homebrew system
+    system "update-mime-database", HOMEBREW_PREFIX/"share/mime"  
+  end
+  
 end
 
 __END__

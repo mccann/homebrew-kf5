@@ -1,25 +1,28 @@
 require "formula"
 
 class Kf5Kdevelop < Formula
-  url "http://download.kde.org/stable/kdevelop/4.7.1/src/kdevelop-4.7.1.tar.xz"
-  sha1 "9b4cf77b753f6847f10709bb616c55c8e515c53c"
-  homepage "http://www.kde.org/"
+  #url "git://anongit.kde.org/kdevelop.git", :using => :git
+  #, :revision => "97fea817e6e5746e3d8b631ac7e9171a3e1f424b"
+  #sha1 "9b4cf77b753f6847f10709bb616c55c8e515c53c"
+  homepage "http://www.kdevelop.org/"
 
-  head "git://anongit.kde.org/kdevelop.git"
-  
+  head "git://anongit.kde.org/kdevelop.git", :branch => 5.0, :revision => "0cb7ea4e5193e53f4b4a5e2b5850d8ed64ff5259"
   
   depends_on "cmake" => :build
   depends_on "haraldf/kf5/kf5-extra-cmake-modules" => :build
   depends_on "qt5" => "with-d-bus"
-  depends_on "llvm" => "with-clang"
+  #depends_on "llvm" => "with-clang"
+
+  # homebrew's llvm 3.6.2 fails to compile against
+  # homebrew's llvm --HEAD is highly unstable, using binary version 3.7 from llvm.org
+  depends_on "kf5-llvm37-bin"
 
   depends_on "gettext" => :build
   depends_on "haraldf/kf5/kf5-kdevplatform"
-  depends_on "haraldf/kf5/kf5-kded"
+  #depends_on "haraldf/kf5/kf5-kded"
   depends_on "haraldf/kf5/kf5-kglobalaccel"
-  depends_on "kf5-oxygen-icons"
-
-  conflicts_with "kdevelop"
+  depends_on "kf5-kiconthemes"
+  depends_on "kf5-breeze-icons"
 
   def patches
     DATA
@@ -27,49 +30,65 @@ class Kf5Kdevelop < Formula
   
   def install
 
-
-    system <<-'FIXUP'
-
-        ## make install dirs KF5
-        #git ls-files -z '*CMakeLists.txt' '*.dox' '*.cmake*'  | xargs -0 sed -i.bak \
-        #         -e 's/KDE_INSTALL_INCLUDEDIR/KDE_INSTALL_INCLUDEDIR_KF5/g'\
-        #         -e 's/KDE_INSTALL_LIBEXECDIR/KDE_INSTALL_LIBEXECDIR_KF5/g'\
-        #         -e 's/KDE_INSTALL_DATADIR/KDE_INSTALL_DATADIR_KF5/g'\
-        #         -e 's/CMAKE_INSTALL_INCLUDEDIR/KDE_INSTALL_INCLUDEDIR_KF5/g'\
-        #         -e 's/CMAKE_INSTALL_LIBEXECDIR/KDE_INSTALL_LIBEXECDIR_KF5/g'\
-        #         -e 's/CMAKE_INSTALL_DATADIR/KDE_INSTALL_DATADIR_KF5/g'\
-        #         -e 's/INCLUDE_INSTALL_DIR/KDE_INSTALL_INCLUDEDIR_KF5/g'
-        #         
-        ## make this work as a KF5 cmake module
-        #git ls-files -z '*CMakeLists.txt' '*.cmake*' | xargs -0 sed -i.bak \
-        #             -e 's/KDevelopConfig/KF5KDevelopConfig/g'\
-        #             -e 's/KDE_INSTALL_CMAKEPACKAGEDIR}\/KDevelop/KDE_INSTALL_CMAKEPACKAGEDIR}\/KF5KDevelop/g'
-        #
-        #git mv cmake/modules/KDevelopConfig.cmake cmake/modules/KF5KDevelopConfig.cmake
-        #
-        #         
-        # make this depend on KF5 KDevPlatform cmake module
-        #git ls-files -z '*CMakeLists.txt' '*.cmake*' | xargs -0 sed -i.bak \
-        #             -e 's/KDevPlatform/KF5KDevPlatform/g'
-        
-    FIXUP
-
+    # don't create mime-databae in Keg -- do this later
+    inreplace "app/CMakeLists.txt", 'update_xdg_mimetypes(', '#update_xdg_mimetypes('
+    # simplify icon name -- avoid rename step later
+    inreplace "app/CMakeLists.txt", "kdevelop_SRCS.icns", "kdevelop.icns"
 
     mkdir "build" do
-        #LLVM in library_paths breaks linking against sytem libs of the same name
-        ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib
-   
+        #LLVM 3.6.2 in library_paths breaks linking against sytem libs of the same name
+        #ENV.remove "HOMEBREW_LIBRARY_PATHS", Formula["llvm"].opt_lib
+
         args = std_cmake_args
 
-        system "cmake", "..", *args
+        system "cmake", *args, ".."
+
         #interactive_shell
         
-        system "make", "install"
-        prefix.install "install_manifest.txt"
-    end
+        inreplace "app/kdevelop.app/Contents/Info.plist", <<-'BEFORE', <<-'AFTER'
+</dict>
+</plist>
+BEFORE
+    <key>LSEnvironment</key>
+    <dict>
+        <key>QT_PLUGIN_PATH</key>
+        <string>/usr/local/lib/plugins:/usr/local/lib/qt5/plugins:/usr/local/lib/kf5/plugins:/usr/local/opt/qt5/plugins</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin</string>
+    </dict>
+</dict>
+</plist>
+AFTER
 
-    # TODO: When (HEAD) QStandardPaths::AppDataLocation points to <kdevelop.app>/Contents/Resources dir in app-bundle
-    # --- could try to either install these files there, or at least make a symlink to /usr/local/share/* 
+        #interactive_shell
+        system "make", "install"
+        
+        #interactive_shell
+        prefix.install "install_manifest.txt"
+    
+
+        # build and install app icon
+        mkdir prefix/"kdevelop.app/Contents/Resources" do 
+            system Formula["kf5-kiconthemes"].opt_bin/"ksvg2icns", 
+                   Formula["kf5-breeze-icons"].opt_share/"icons/breeze/apps/48/kdevelop.svg"
+        end 
+    end
+    
+    #fix icons to work as part of 'breeze' theme
+    mv share/"icons/hicolor", share/"icons/breeze"
+    mv share/"kdevelop/icons/hicolor", share/"kdevelop/icons/breeze"
+
+    # remove icons that conflict with breeze theme before linking
+    Dir.glob(share/"icons/breeze/**/kdevelop.*") { |icon| File.delete(icon) }
+
+
+
+  end
+
+  def post_install
+
+    #update mime-database in homebrew system
+    system "update-mime-database", HOMEBREW_PREFIX/"share/mime"  
 
     # Make findable from QStandardPaths:
     support  = "#{Etc.getpwuid.dir}/Library/Application Support"
@@ -87,57 +106,14 @@ class Kf5Kdevelop < Formula
 
     # all prefs
     system "ln -sf /usr/local/etc/xdg/*  #{prefs}"
-    
-    #fix icons to work as part of 'oxygen' theme
-    mv share/"icons/hicolor", share/"icons/oxygen"
-    mv share/"kdevelop/icons/hicolor", share/"kdevelop/icons/oxygen"
-
-    # remove icons that conflict with oxygen theme before linking
-    Dir.glob(share/"icons/oxygen/**/kdevelop.*") { |icon| File.delete(icon) }
 
   end
+
 end
 
 __END__
-##################
-# disable qmljs for now
-##################
-diff --git a/languages/CMakeLists.txt b/languages/CMakeLists.txt
-index 22d29ec..43e8e78 100644
---- a/languages/CMakeLists.txt
-+++ b/languages/CMakeLists.txt
-@@ -1,5 +1,5 @@
- ecm_optional_add_subdirectory(plugins)
--ecm_optional_add_subdirectory(qmljs)
-+#ecm_optional_add_subdirectory(qmljs)
+
  
- option(LEGACY_CPP_SUPPORT "Enable legacy C++ backend" OFF)
- 
-
-
-##################
-# enable hidpi
-##################
-diff --git a/app/Info.plist.in b/app/Info.plist.in
-index ca6c7de..be256f9 100644
---- a/app/Info.plist.in
-+++ b/app/Info.plist.in
-@@ -34,6 +34,10 @@
-     <true/>
-     <key>NSSupportsAutomaticTermination</key>
-     <false/>
-+    <key>NSPrincipalClass</key>
-+    <string>NSApplication</string>
-+    <key>NSHighResolutionCapable</key>
-+    <string>True</string>
-     <key>NSHumanReadableCopyright</key>
-     <string>${MACOSX_BUNDLE_COPYRIGHT}</string>
- </dict>
-
-
-##################
-# clang issue
-##################
 diff --git a/languages/cpp/preprocessjob.cpp b/languages/cpp/preprocessjob.cpp
 index d84a445..59cf286 100644
 --- a/languages/cpp/preprocessjob.cpp
@@ -151,4 +127,15 @@ index d84a445..59cf286 100644
            }
          }
      }
-
+diff --git a/languages/plugins/custom-definesandincludes/CMakeLists.txt b/languages/plugins/custom-definesandincludes/CMakeLists.txt
+index 810b2dc..011e6b4 100644
+--- a/languages/plugins/custom-definesandincludes/CMakeLists.txt
++++ b/languages/plugins/custom-definesandincludes/CMakeLists.txt
+@@ -39,6 +39,7 @@ target_link_libraries( kdevdefinesandincludesmanager LINK_PRIVATE
+ option(BUILD_kdev_includepathsconverter "Build utility to modify include paths of a project from command line." ON)
+ if(BUILD_kdev_includepathsconverter)
+     add_executable(kdev_includepathsconverter includepathsconverter.cpp)
++    ecm_mark_nongui_executable(kdev_includepathsconverter)
+     target_link_libraries(kdev_includepathsconverter LINK_PRIVATE
+         ${KDEVPLATFORM_PROJECT_LIBRARIES}
+         kdevcompilerprovider
